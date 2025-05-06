@@ -9,9 +9,7 @@
    INSERT INTO TargetTable WITH (TABLOCK) (column)
    SELECT * FROM SourceTable
 
-   ** Performance Differences
-   ** Trade-offs
-   ** Best Case Scenarios
+   
 */
 
 --------------------------------------------------------
@@ -34,7 +32,7 @@ SELECT COUNT(*) AS t2_COUNT FROM dbo.t2;
 
 
 -- Enable performance statistics
-SET STATISTICS TIME, IO ON;
+SET STATISTICS TIME ON;
 SET NOCOUNT ON;
 
 

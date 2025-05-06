@@ -15,13 +15,12 @@ CHECKPOINT
 
 /* INSERT USING OPENROWSET AND BULK FUNCTION */
 
-INSERT INTO dbo.TargetTable1 --3481094, 13415 pages
+INSERT INTO dbo.TargetTable1 
 SELECT *
 FROM OPENROWSET(
     BULK 'C:\Program Files\Microsoft SQL Server\MSSQL16.SQL2022\MSSQL\SourceFile.csv',
     FORMAT='CSV',
-    FIRSTROW=2
-    
+    FIRSTROW=2    
 ) 
 WITH (
     Column1 INT,
@@ -32,7 +31,7 @@ WITH (
 /* VERIFY COUNT  */
 SELECT COUNT(*) FROM dbo.TargetTable1;
 
-
+/* CHECK LOGGING */
 SELECT Operation, COUNT(*) AS Count
 FROM sys.fn_dblog(NULL, NULL) 
 WHERE Operation IN (N'LOP_INSERT_ROWS', 'LOP_FORMAT_PAGE')
@@ -41,19 +40,25 @@ ORDER BY COUNT(*) DESC;
 
 
 
-
+/* RESET */
 TRUNCATE TABLE dbo.TargetTable1;
-CHECKPOINT
+CHECKPOINT --Run a few times
 
+--Verify if clear
+SELECT Operation, COUNT(*) AS Count
+FROM sys.fn_dblog(NULL, NULL) 
+WHERE Operation IN (N'LOP_INSERT_ROWS', 'LOP_FORMAT_PAGE')
+GROUP BY Operation
+ORDER BY COUNT(*) DESC;
 
 /* INSERT USING OPENROWSET AND BULK FUNCTION WITH TABLOCK */
 
-INSERT INTO dbo.TargetTable1 WITH (TABLOCK) 
+INSERT INTO dbo.TargetTable1 WITH (TABLOCK) --Tablock hint
 SELECT *
 FROM OPENROWSET(
     BULK 'C:\Program Files\Microsoft SQL Server\MSSQL16.SQL2022\MSSQL\SourceFile.csv',
    FORMAT='CSV',
-    FIRSTROW=2    
+    FIRSTROW=2	
 ) 
 WITH (
     Column1 INT,
@@ -62,9 +67,11 @@ WITH (
 ) 
 AS data;
 
+
+/* VERIFY COUNT  */
 SELECT COUNT(*) FROM dbo.TargetTable1;
 
-
+/* CHECK LOGGING */
 SELECT Operation, COUNT(*) AS Count
 FROM sys.fn_dblog(NULL, NULL) 
 WHERE Operation IN (N'LOP_INSERT_ROWS', 'LOP_FORMAT_PAGE')
